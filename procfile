@@ -1,1 +1,1 @@
-gunicorn --worker-class gevent -w 1 --bind 0.0.0.0:$PORT "app:socketio.WSGIApp(socketio, app)"
+gunicorn --worker-class gevent -w 1 --bind 0.0.0.0:$PORT app:wsgi_app

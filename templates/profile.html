@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+{% block title %}Profile - Y254-KE{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 sidebar">
+            <div class="user-info">
+                <img src="{{ url_for('static', filename='profile_pics/' + user.profile_pic) }}" 
+                     class="profile-pic" alt="Profile">
+                <h5>{{ user.username }}</h5>
+                <small>{{ user.status }}</small>
+            </div>
+            
+            <div class="sidebar-menu">
+                <a href="{{ url_for('dashboard') }}">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <a href="{{ url_for('contacts') }}">
+                    <i class="fas fa-users"></i> Contacts
+                </a>
+                <a href="{{ url_for('profile') }}" class="active">
+                    <i class="fas fa-user"></i> Profile
+                </a>
+                <a href="{{ url_for('logout') }}">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-md-9 main-content">
+            <h1 class="mb-4">Profile Settings</h1>
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card mb-4">
+                        <div class="card-body text-center">
+                            <img src="{{ url_for('static', filename='profile_pics/' + user.profile_pic) }}" 
+                                 id="profilePreview" class="rounded-circle mb-3" width="150" height="150">
+                            <h4>{{ user.username }}</h4>
+                            <p class="text-muted">{{ user.email }}</p>
+                            <p class="text-muted">Member since: {{ user.created_at.strftime('%B %d, %Y') }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Account Info</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table">
+                                <tr>
+                                    <td><strong>Username:</strong></td>
+                                    <td>{{ user.username }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Email:</strong></td>
+                                    <td>{{ user.email }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Last Seen:</strong></td>
+                                    <td>{{ user.last_seen.strftime('%Y-%m-%d %H:%M') }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Status:</strong></td>
+                                    <td id="currentStatus">{{ user.status }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-8">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Edit Profile</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST" action="{{ url_for('profile') }}" enctype="multipart/form-data">
+                                <div class="mb-3">
+                                    <label for="profile_pic" class="form-label">Profile Picture</label>
+                                    <input type="file" class="form-control" id="profile_pic" name="profile_pic" 
+                                           accept="image/*" onchange="previewImage(event)">
+                                    <div class="form-text">Supported formats: JPG, PNG, GIF (Max 2MB)</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="status" class="form-label">Status</label>
+                                    <input type="text" class="form-control" id="status" name="status" 
+                                           value="{{ user.status }}" placeholder="What's on your mind?">
+                                    <div class="form-text">This will be visible to your contacts</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Quick Status Options</label>
+                                    <div class="d-flex gap-2 flex-wrap">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" 
+                                                onclick="setStatus('Available')">
+                                            Available
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" 
+                                                onclick="setStatus('Busy')">
+                                            Busy
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" 
+                                                onclick="setStatus('Away')">
+                                            Away
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" 
+                                                onclick="setStatus('Do not disturb')">
+                                            Do not disturb
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" 
+                                                onclick="setStatus('In a meeting')">
+                                            In a meeting
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-4">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-2"></i>Save Changes
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Security</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label">Change Password</label>
+                                <a href="#" class="btn btn-outline-warning btn-sm ms-3" 
+                                   data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                                    Change Password
+                                </a>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Account Privacy</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="privacyToggle" checked>
+                                    <label class="form-check-label" for="privacyToggle">
+                                        Allow others to find me by email
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <hr>
+                            
+                            <div class="d-grid">
+                                <button class="btn btn-outline-danger" data-bs-toggle="modal" 
+                                        data-bs-target="#deleteAccountModal">
+                                    <i class="fas fa-trash-alt me-2"></i>Delete Account
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Change Password Modal -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Change Password</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="passwordForm">
+                    <div class="mb-3">
+                        <label for="currentPassword" class="form-label">Current Password</label>
+                        <input type="password" class="form-control" id="currentPassword" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label">New Password</label>
+                        <input type="password" class="form-control" id="newPassword" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirmNewPassword" class="form-label">Confirm New Password</label>
+                        <input type="password" class="form-control" id="confirmNewPassword" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="changePassword()">Update Password</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Account Modal -->
+<div class="modal fade" id="deleteAccountModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-danger">Delete Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-danger"><strong>Warning: This action cannot be undone!</strong></p>
+                <p>All your messages, contacts, and account data will be permanently deleted.</p>
+                <p>To confirm deletion, type your username below:</p>
+                <input type="text" class="form-control" id="confirmUsername" 
+                       placeholder="Enter your username">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" onclick="deleteAccount()" 
+                        id="deleteBtn" disabled>Delete My Account</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function previewImage(event) {
+    const reader = new FileReader();
+    reader.onload = function() {
+        const output = document.getElementById('profilePreview');
+        output.src = reader.result;
+    };
+    reader.readAsDataURL(event.target.files[0]);
+}
+
+function setStatus(status) {
+    document.getElementById('status').value = status;
+    document.getElementById('currentStatus').textContent = status;
+}
+
+document.getElementById('confirmUsername').addEventListener('input', function() {
+    const deleteBtn = document.getElementById('deleteBtn');
+    deleteBtn.disabled = this.value !== '{{ user.username }}';
+});
+
+function changePassword() {
+    // Implement password change functionality
+    alert('Password change functionality would be implemented here');
+}
+
+function deleteAccount() {
+    if (confirm('Are you absolutely sure? This will delete all your data permanently!')) {
+        // Implement account deletion
+        alert('Account deletion functionality would be implemented here');
+    }
+}
+</script>
+{% endblock %}

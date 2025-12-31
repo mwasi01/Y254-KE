@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+{% block title %}Contacts - Y254-KE{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 sidebar">
+            <div class="user-info">
+                <img src="{{ url_for('static', filename='profile_pics/' + current_user.profile_pic) }}" 
+                     class="profile-pic" alt="Profile">
+                <h5>{{ current_user.username }}</h5>
+                <small>{{ current_user.status }}</small>
+            </div>
+            
+            <div class="sidebar-menu">
+                <a href="{{ url_for('dashboard') }}">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <a href="{{ url_for('contacts') }}" class="active">
+                    <i class="fas fa-users"></i> Contacts
+                </a>
+                <a href="{{ url_for('profile') }}">
+                    <i class="fas fa-user"></i> Profile
+                </a>
+                <a href="{{ url_for('logout') }}">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+            
+            <div class="online-users mt-4">
+                <h6 class="border-bottom pb-2">Online Now</h6>
+                <div id="online-users-list">
+                    <!-- Online users will be loaded via JavaScript -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-md-9 main-content">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>Contacts</h1>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addContactModal">
+                    <i class="fas fa-user-plus me-2"></i>Add Contact
+                </button>
+            </div>
+            
+            <div class="row">
+                <!-- My Contacts -->
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">My Contacts</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="my-contacts-list">
+                                {% for contact_id in contacts %}
+                                    {% set user = users|selectattr("id", "equalto", contact_id)|first %}
+                                    {% if user %}
+                                    <div class="contact-item d-flex align-items-center p-3 border-bottom">
+                                        <img src="{{ url_for('static', filename='profile_pics/' + user.profile_pic) }}" 
+                                             class="rounded-circle me-3" width="50" height="50">
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-0">{{ user.username }}</h6>
+                                            <small class="text-muted">{{ user.status }}</small>
+                                        </div>
+                                        <div>
+                                            <a href="{{ url_for('chat', contact_id=user.id) }}" 
+                                               class="btn btn-sm btn-outline-primary me-2">
+                                                <i class="fas fa-comment"></i>
+                                            </a>
+                                            <button class="btn btn-sm btn-outline-danger remove-contact" 
+                                                    data-user-id="{{ user.id }}">
+                                                <i class="fas fa-user-minus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- All Users -->
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-secondary text-white">
+                            <h5 class="mb-0">Discover Users</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <input type="text" class="form-control" id="searchUsers" 
+                                       placeholder="Search users...">
+                            </div>
+                            <div id="all-users-list">
+                                {% for user in users %}
+                                    {% if user.id not in contacts and user.id != current_user.id %}
+                                    <div class="user-item d-flex align-items-center p-3 border-bottom">
+                                        <img src="{{ url_for('static', filename='profile_pics/' + user.profile_pic) }}" 
+                                             class="rounded-circle me-3" width="50" height="50">
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-0">{{ user.username }}</h6>
+                                            <small class="text-muted">{{ user.status }}</small>
+                                        </div>
+                                        <div>
+                                            <button class="btn btn-sm btn-success add-contact" 
+                                                    data-user-id="{{ user.id }}">
+                                                <i class="fas fa-user-plus"></i> Add
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Contact Modal -->
+<div class="modal fade" id="addContactModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Contact</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addContactForm">
+                    <div class="mb-3">
+                        <label class="form-label">Search by Username or Email</label>
+                        <input type="text" class="form-control" id="contactSearch" 
+                               placeholder="Enter username or email">
+                    </div>
+                    <div id="searchResults" class="mt-3"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add contact functionality
+    document.querySelectorAll('.add-contact').forEach(button => {
+        button.addEventListener('click', async function() {
+            const userId = this.dataset.userId;
+            try {
+                const response = await fetch(`/api/add_contact/${userId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    location.reload();
+                }
+            } catch (error) {
+                console.error('Error adding contact:', error);
+            }
+        });
+    });
+    
+    // Search users
+    const searchInput = document.getElementById('searchUsers');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            document.querySelectorAll('.user-item').forEach(item => {
+                const username = item.querySelector('h6').textContent.toLowerCase();
+                const status = item.querySelector('small').textContent.toLowerCase();
+                if (username.includes(searchTerm) || status.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

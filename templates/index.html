@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Y254-KE - Welcome{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row align-items-center">
+        <div class="col-md-6">
+            <h1 class="display-4 mb-4">Welcome to <span class="text-primary">Y254-KE</span></h1>
+            <p class="lead mb-4">The next-generation social messaging platform that combines the best of WhatsApp with enhanced features.</p>
+            <div class="features-list mb-4">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="fas fa-comment-dots fa-2x text-primary me-3"></i>
+                    <div>
+                        <h5>Real-time Messaging</h5>
+                        <p class="text-muted">Instant chat with anyone, anywhere</p>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center mb-3">
+                    <i class="fas fa-file-upload fa-2x text-primary me-3"></i>
+                    <div>
+                        <h5>Secure File Sharing</h5>
+                        <p class="text-muted">Share documents, images, and media</p>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center mb-3">
+                    <i class="fas fa-users fa-2x text-primary me-3"></i>
+                    <div>
+                        <h5>Contact Management</h5>
+                        <p class="text-muted">Connect with friends and colleagues</p>
+                    </div>
+                </div>
+            </div>
+            <div class="d-grid gap-2 d-md-flex">
+                <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg px-4 me-md-2">
+                    <i class="fas fa-user-plus me-2"></i>Get Started
+                </a>
+                <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-lg px-4">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login
+                </a>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <img src="https://images.unsplash.com/photo-1611605698335-8b1569810432?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" 
+                 class="img-fluid rounded shadow" alt="Y254-KE Platform">
+        </div>
+    </div>
+    
+    <div class="row mt-5 pt-5">
+        <div class="col-12 text-center">
+            <h2 class="mb-4">Why Choose Y254-KE?</h2>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
+                    <h4 class="card-title">Enhanced Security</h4>
+                    <p class="card-text">Your conversations are secure with end-to-end encryption and privacy controls.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-bolt fa-3x text-primary mb-3"></i>
+                    <h4 class="card-title">Lightning Fast</h4>
+                    <p class="card-text">Optimized for speed with real-time updates and minimal latency.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-expand-alt fa-3x text-primary mb-3"></i>
+                    <h4 class="card-title">Rich Features</h4>
+                    <p class="card-text">File sharing, status updates, contact management, and more.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="bg-dark text-white mt-5 py-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Y254-KE</h5>
+                <p>Your enhanced social messaging platform</p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <p>&copy; 2024 Y254-KE. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+</footer>
+{% endblock %}

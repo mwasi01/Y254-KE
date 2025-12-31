@@ -59,7 +59,7 @@ class Config:
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
     
     # SocketIO configuration - MUST MATCH YOUR WORKER CLASS
-    SOCKETIO_ASYNC_MODE = 'gevent'  # CHANGED FROM 'eventlet' TO 'gevent'
+    SOCKETIO_ASYNC_MODE = 'gevent'
     
     # Application settings
     APP_NAME = "Y254-KE"
@@ -74,7 +74,7 @@ db = SQLAlchemy(app)
 socketio = SocketIO(
     app, 
     cors_allowed_origins="*", 
-    async_mode=app.config['SOCKETIO_ASYNC_MODE'],  # This is now 'gevent'
+    async_mode=app.config['SOCKETIO_ASYNC_MODE'],
     logger=True,
     engineio_logger=True
 )
@@ -889,8 +889,18 @@ def init_app():
         
         app.logger.info('Application initialized successfully')
 
-# Production WSGI application for gunicorn
-application = socketio
+# Create WSGI application for gunicorn
+def create_app():
+    """Factory function to create the application"""
+    init_app()
+    # Return the Flask app wrapped with SocketIO
+    return app
+
+# Create application instance
+application = create_app()
+
+# Create WSGI middleware for SocketIO
+wsgi_app = socketio.WSGIApp(socketio, application)
 
 if __name__ == '__main__':
     # Initialize the application

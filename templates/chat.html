@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Chat with {{ contact.username }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3 sidebar">
+            <!-- Same sidebar as dashboard -->
+        </div>
+        
+        <div class="col-md-9 chat-container">
+            <div class="chat-header">
+                <img src="{{ url_for('static', filename='profile_pics/' + contact.profile_pic) }}" 
+                     class="chat-profile-pic">
+                <div>
+                    <h5>{{ contact.username }}</h5>
+                    <small id="contact-status">{{ contact.status }}</small>
+                </div>
+            </div>
+            
+            <div class="chat-messages" id="chat-messages">
+                {% for message in messages %}
+                    <div class="message {% if message.sender_id == current_user.id %}sent{% else %}received{% endif %}">
+                        {% if message.file_path %}
+                            {% if message.file_type in ['image/jpeg', 'image/png', 'image/gif'] %}
+                                <img src="{{ url_for('static', filename='uploads/' + message.file_path) }}" 
+                                     class="file-preview">
+                            {% else %}
+                                <div class="file-message">
+                                    <i class="fas fa-file"></i>
+                                    <a href="{{ url_for('static', filename='uploads/' + message.file_path) }}" 
+                                       download>
+                                        Download File
+                                    </a>
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                        <p>{{ message.content }}</p>
+                        <small>{{ message.timestamp.strftime('%H:%M') }}</small>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <div class="chat-input">
+                <form id="message-form">
+                    <input type="file" id="file-input" style="display: none;">
+                    <button type="button" id="attach-btn" class="btn btn-secondary">
+                        <i class="fas fa-paperclip"></i>
+                    </button>
+                    <input type="text" id="message-input" placeholder="Type your message..." autocomplete="off">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const contactId = {{ contact.id }};
+    const currentUserId = {{ current_user.id }};
+</script>
+{% endblock %}

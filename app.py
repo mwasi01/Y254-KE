@@ -3,6 +3,10 @@ Y254-KE - Enhanced Social Messaging Platform
 Main Application File
 """
 
+# GEVENT MONKEY PATCH - MUST BE AT THE VERY TOP
+import gevent.monkey
+gevent.monkey.patch_all()
+
 import os
 import json
 from datetime import datetime, timedelta
@@ -54,8 +58,8 @@ class Config:
     # Session configuration
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
     
-    # SocketIO configuration
-    SOCKETIO_ASYNC_MODE = 'eventlet'
+    # SocketIO configuration - MUST MATCH YOUR WORKER CLASS
+    SOCKETIO_ASYNC_MODE = 'gevent'  # CHANGED FROM 'eventlet' TO 'gevent'
     
     # Application settings
     APP_NAME = "Y254-KE"
@@ -65,7 +69,16 @@ app.config.from_object(Config)
 
 # Initialize extensions
 db = SQLAlchemy(app)
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode=app.config['SOCKETIO_ASYNC_MODE'])
+
+# Initialize SocketIO with gevent async_mode
+socketio = SocketIO(
+    app, 
+    cors_allowed_origins="*", 
+    async_mode=app.config['SOCKETIO_ASYNC_MODE'],  # This is now 'gevent'
+    logger=True,
+    engineio_logger=True
+)
+
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 login_manager.login_message = 'Please login to access this page.'
@@ -74,7 +87,7 @@ login_manager.login_message_category = 'info'
 # Configure logging
 if not app.debug:
     if not os.path.exists('logs'):
-        os.mkdir('logs')
+        os.makedirs('logs')
     file_handler = RotatingFileHandler('logs/y254ke.log', maxBytes=10240, backupCount=10)
     file_handler.setFormatter(logging.Formatter(
         '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
